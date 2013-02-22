@@ -1,0 +1,13 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/test.css')
+    script(src='/socket.io/socket.io.js')
+    script(src='http://d3js.org/d3.v3.min.js')
+  body
+    h1= title
+    p Welcome to #{title}
+    p#news Hello World!
+    p#reading 0
+    script(src='/javascripts/test.js')
