@@ -2,7 +2,6 @@
 var config = require('./config'),
     express = require('express'),
     routes = require('./routes'),
-    test = require('./routes/test'),
     http = require('http'),
     path = require('path'),
     reflecta = require('reflecta'),
@@ -30,7 +29,8 @@ app.configure('development', function(){
 
 // set routes
 app.get('/', routes.index);
-app.get('/test', test.test);
+app.get('/dash', routes.dash);
+app.get('/test', routes.test);
 
 // create server and socket listener
 server = http.createServer(app);
@@ -74,7 +74,7 @@ board.on('ready', function() {
   }
 });
 
-
+// start analog pin monitor using async
 function monitorAnalog(socket) {
   if(analogMonitorInterval) clearInterval(analogMonitorInterval);
 
@@ -93,6 +93,7 @@ function monitorAnalog(socket) {
   }
 }
 
+// analogRead with callback to async
 function queryAnalogPin(pin, callback) {
   board.ardu1.analogRead(pin, function(val) {
     analogMonitorReadings.push({pin: 'A'+pin, reading: val});
