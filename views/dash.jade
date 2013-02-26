@@ -6,21 +6,24 @@ html(ng-app)
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
     script(src='/javascripts/angular.min.js')
-    script(src='/javascripts/pins.js')
-  
+    
   body
     script(src='/socket.io/socket.io.js')
     script(src='http://d3js.org/d3.v3.min.js')
     .container-fluid
         .row-fluid
-            .span4(ng-controller='PinCtrl')
+            .span11.offset1
+                h1 Dashboard
+        .row-fluid
+            .span2.offset1(ng-controller='PinCtrl')
                 ul.unstyled
-                    li.apin(ng-repeat='pin in analogPins')
-                        span.pin_name {{pin.name}}
-                        input(type='checkbox', ng-model='pin.monitor', ng-click='getMonitorPins()')
-            .span8
-                h1 digi pins goes here
-    .container
-        h1 Dashboard
+                    li(ng-repeat='pin in analogPins')
+                        span.label.label-inverse {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Monitor
+                            input(type='checkbox', ng-model='pin.monitor', ng-click='getMonitorPins()')
+            .span9
+
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/javascripts/pins.js')
