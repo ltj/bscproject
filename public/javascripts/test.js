@@ -11,17 +11,17 @@ socket.on('news', function (data) {
 socket.on('analog', function (data) {
   //console.log(data);
   document.getElementById("reading").firstChild.nodeValue = data.reading;
-  var endangle = (data.reading == 1023) ? twoPi :  (twoPi / 1024) * data.reading;
+  var endangle = (data.data[0].reading == 1023) ? twoPi :  (twoPi / 1024) * data.data[0].reading;
   foreground.attr("d", arc.endAngle(endangle));
-  text.text(data.reading);
+  text.text(data.data[0].reading);
   
-  if (data.reading > maxval) {
-    maxval = data.reading;
+  if (data.data[0].reading > maxval) {
+    maxval = data.data[0].reading;
     linemax.attr("transform", "rotate(" + (endangle * (180/Math.PI)) + ")");
   }
 
   // push a new data point onto the back
-  datadata.push(data.reading);
+  datadata.push(data.data[0].reading);
  
   // redraw the line, and slide it to the left
   if(datadata.length == n) {
