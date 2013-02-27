@@ -2,11 +2,10 @@
  * Setup socket and d3 environment
  */
 var socket = io.connect('http://' + window.location.hostname);
-
 var meterdata = [];
 
-var width = 400,
-	height = 800,
+var width = 500,
+	height = 0,
 	twoPi = 2 * Math.PI,
 	progress = 0,
 	total = 1308573, // must be hard-coded if server doesn't report Content-Length
@@ -17,25 +16,34 @@ var arc = d3.svg.arc()
 	.innerRadius(30)
 	.outerRadius(40);
 
-var svg = d3.select("#visual").append("svg")
+var svg = d3.select("#dials").append("svg")
 	.attr("width", width)
 	.attr("height", height)
 	.append("g")
-	.attr("transform", "translate(" + 60 + "," + 60 + ")");
+	.attr("transform", "translate(" + 70 + "," + 60 + ")");
 
+/*
+ * Socket event handlers
+ */
 socket.on('analog', function (data) {
 	meterdata = data.data;
-	updateMeters();
+	updateDials();
 });
 
-function updateMeters() {
+/*
+ * D3 visualizations
+ */
+function updateDials() {
+	var canvas = d3.select("svg");
 	var meter = svg.selectAll("g").data(meterdata, function(d) { return d.pin; });
 
 	// enter
-	var enter = meter.enter()
-		.append("g")
+	var enter = meter.enter().append("g")
 		.attr("transform", function(d, i) { return "translate(" + 0 + "," + i * 90 + ")"; })
-		.attr("class", "progress-meter");
+		.attr("class", "analog-dial")
+		.each(function() {
+			canvas.attr("height", Number(canvas.attr("height")) + 100);
+		});
 
 	enter.append("path")
 		.attr("class", "background")
@@ -48,13 +56,6 @@ function updateMeters() {
 			return arc.endAngle(endangle)();
 		});
 
-	enter.append("line")
-		.attr("class", "maxline")
-		.attr("x1", 0)
-		.attr("y1", -arc.innerRadius()())
-		.attr("x2", 0)
-		.attr("y2", -arc.outerRadius()());
-
 	enter.append("text")
 		.attr("text-anchor", "middle")
 		.attr("dy", ".35em")
@@ -62,7 +63,18 @@ function updateMeters() {
 			return d.reading;
 		});
 
+	enter.append("text")
+		.attr("x", "-70")
+		.attr("dy", ".35em")
+		.text(function(d) {
+			return d.pin;
+		});
+
 	// update
+	meter.transition()
+		.duration(150)
+		.attr("transform", function(d, i) { return "translate(" + 0 + "," + i * 90 + ")"; });
+
 	meter.select(".foreground")
 		.attr("d", function(d) {
 			var endangle = (d.reading == 1023) ? twoPi : (twoPi / 1024) * d.reading;
@@ -75,5 +87,13 @@ function updateMeters() {
 		});
 
 	// exit
-	meter.exit().remove();
+	meter.exit().remove()
+		.each(function() {
+			canvas.transition()
+				.duration(600).attr("height", Number(canvas.attr("height")) - 100);
+		});
+}
+
+function updateCharts() {
+
 }

@@ -15,17 +15,49 @@ html(ng-app)
         .row-fluid
             .span11.offset1
                 h1 Dashboard
-        .row-fluid
-            .span2.offset1(ng-controller='PinCtrl')
+        .row-fluid(ng-controller='PinCtrl')
+            .span2.offset1
                 ul.unstyled
                     li(ng-repeat='pin in analogPins')
-                        span.label.label-inverse {{pin.name}}
+                        span.label.label-info {{pin.name}}
                         = ' '
                         label.checkbox.inline Monitor
-                            input(type='checkbox', ng-model='pin.monitor', ng-click='setMonitorPins()')
-            .span9
+                            input(type='checkbox', ng-model='pin.monitor', 
+                                ng-click='setMonitorPins()')
+            .span3
+                ul.unstyled
+                    li(ng-repeat='pin in digitalPins1')
+                        span.label {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Toggle
+                            input(type='checkbox',
+                                ng-model='pin.toggle',
+                                ng-disabled='pin.input',
+                                ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                        = ' '
+                        label.checkbox.inline Input
+                            input(type='checkbox',
+                                ng-model='pin.input',
+                                ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
+            .span3
+                ul.unstyled
+                    li(ng-repeat='pin in digitalPins2')
+                        span.label {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Toggle
+                            input(type='checkbox',
+                                ng-model='pin.toggle',
+                                ng-disabled='pin.input',
+                                ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                        = ' '
+                        label.checkbox.inline Input
+                            input(type='checkbox',
+                                ng-model='pin.input',
+                                ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
+            .span3
         .row-fluid
-            #visual.span11.offset1
+            #dials.span3.offset1
+            #charts.span8
 
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')

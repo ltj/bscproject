@@ -48,10 +48,14 @@ var analogMonitorInterval,
 
 // websockets connection and events
 io.sockets.on('connection', function (socket) {
-  socket.on('amonitor', function (data) {
+  socket.on('aread', function (data) {
     if(analogMonitorInterval) clearInterval(analogMonitorInterval);
     analogMonitorPins = data.pins;
     if(data.pins.length !== 0) monitorAnalog(socket);
+  });
+
+  socket.on('dwrite', function (data) {
+    board.ardu1.digitalWrite(data.pin, data.val);
   });
 });
 
