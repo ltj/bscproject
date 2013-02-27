@@ -9,11 +9,19 @@ function PinCtrl($scope) {
 		{name: 'A4', value: 4, monitor: false},
 		{name: 'A5', value: 5, monitor: false}];
 
-	$scope.getMonitorPins = function() {
+	$scope.setMonitorPins = function() {
 		var pins = [];
 		angular.forEach($scope.analogPins, function(pin) {
 			if(pin.monitor) pins.push(pin.value);
 		});
-		console.log(pins);
+
+		socket.emit('amonitor', { pins: pins });
+		console.log({ pins: pins });
+
+		if(pins.length === 0) {
+			meterdata = [];
+			updateMeters();
+		}
+		
 	};
 }

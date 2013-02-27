@@ -1,12 +1,13 @@
 doctype 5
 html(ng-app)
-  
+
   head
     title= title
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
+    link(rel='stylesheet', href='/stylesheets/visuals.css')
     script(src='/javascripts/angular.min.js')
-    
+
   body
     script(src='/socket.io/socket.io.js')
     script(src='http://d3js.org/d3.v3.min.js')
@@ -21,9 +22,12 @@ html(ng-app)
                         span.label.label-inverse {{pin.name}}
                         = ' '
                         label.checkbox.inline Monitor
-                            input(type='checkbox', ng-model='pin.monitor', ng-click='getMonitorPins()')
+                            input(type='checkbox', ng-model='pin.monitor', ng-click='setMonitorPins()')
             .span9
+        .row-fluid
+            #visual.span11.offset1
 
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/javascripts/dashboard.js')
     script(src='/javascripts/pins.js')

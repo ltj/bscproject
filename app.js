@@ -44,13 +44,14 @@ server.listen(app.get('port'), function(){
  *  at some point.
  */
 var analogMonitorInterval,
-    analogMonitorPins,
-    analogMonitorReadings = [];
+    analogMonitorPins = [0, 1];
 
+// websockets connection and events
 io.sockets.on('connection', function (socket) {
   socket.on('amonitor', function (data) {
+    if(analogMonitorInterval) clearInterval(analogMonitorInterval);
     analogMonitorPins = data.pins;
-    monitorAnalog(socket);
+    if(data.pins.length !== 0) monitorAnalog(socket);
   });
 });
 
@@ -76,27 +77,21 @@ board.on('ready', function() {
 
 // start analog pin monitor using async
 function monitorAnalog(socket) {
-  if(analogMonitorInterval) clearInterval(analogMonitorInterval);
-
-  if(analogMonitorPins.length !== 0) {
-    analogMonitorInterval = setInterval(function() {
-      async.each(analogMonitorPins, queryAnalogPin, function(err) {
-        if(err) {
-          console.log(err);
-        }
-        else {
-          socket.emit('analog', {data: analogMonitorReadings});
-          analogMonitorReadings = []; // clear readings
-        }
-      });
-    }, 100);
-  }
+  analogMonitorInterval = setInterval(function() {
+    async.mapSeries(analogMonitorPins, queryAnalogPin, function(err, results) {
+      if(err) {
+        console.log(err);
+      }
+      else {
+        socket.emit('analog', {data: results});
+      }
+    });
+  }, 100);
 }
 
 // analogRead with callback to async
 function queryAnalogPin(pin, callback) {
   board.ardu1.analogRead(pin, function(val) {
-    analogMonitorReadings.push({pin: 'A'+pin, reading: val});
-    callback();
+    callback(null, {pin: 'A'+pin, reading: val});
   });
 }
