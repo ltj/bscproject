@@ -4,9 +4,9 @@ console.log(window.location.hostname);
 var maxval = 0;
 
 socket.on('news', function (data) {
-	console.log(data);
-	document.getElementById("news").firstChild.nodeValue = data.hello;
-	// socket.emit('my other event', { my: 'data' });
+  console.log(data);
+  document.getElementById("news").firstChild.nodeValue = data.hello;
+  // socket.emit('my other event', { my: 'data' });
 });
 socket.on('analog', function (data) {
   //console.log(data);
@@ -14,7 +14,7 @@ socket.on('analog', function (data) {
   var endangle = (data.data[0].reading == 1023) ? twoPi :  (twoPi / 1024) * data.data[0].reading;
   foreground.attr("d", arc.endAngle(endangle));
   text.text(data.data[0].reading);
-  
+
   if (data.data[0].reading > maxval) {
     maxval = data.data[0].reading;
     linemax.attr("transform", "rotate(" + (endangle * (180/Math.PI)) + ")");
@@ -22,7 +22,7 @@ socket.on('analog', function (data) {
 
   // push a new data point onto the back
   datadata.push(data.data[0].reading);
- 
+
   // redraw the line, and slide it to the left
   if(datadata.length == n) {
     path
@@ -32,7 +32,7 @@ socket.on('analog', function (data) {
         .duration(500)
         .ease("linear")
         .attr("transform", "translate(" + x(-1) + ")");
-   
+
     // pop the old data point off the front
     datadata.shift();
     return;
@@ -42,7 +42,7 @@ socket.on('analog', function (data) {
   }
 });
 socket.on('disconnect', function () {
-	document.getElementById("news").firstChild.nodeValue = "oh no. lost connection";
+  document.getElementById("news").firstChild.nodeValue = "oh no. lost connection";
 });
 
 var width = 300,
@@ -86,39 +86,39 @@ var text = meter.append("text")
 
 var n = 100,
     datadata = [0];
- 
+
 var margin = {top: 10, right: 10, bottom: 20, left: 40},
     width = 600 - margin.left - margin.right,
     height = 280 - margin.top - margin.bottom;
- 
+
 var x = d3.scale.linear()
     .domain([0, n - 1])
     .range([0, width]);
- 
+
 var y = d3.scale.linear()
     .domain([0, 1023])
     .range([height, 0]);
- 
+
 var line = d3.svg.line()
     .x(function(d, i) { return x(i); })
     .y(function(d, i) { return y(d); });
- 
+
 var svg2 = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
- 
+
 svg2.append("defs").append("clipPath")
     .attr("id", "clip")
   .append("rect")
     .attr("width", width)
     .attr("height", height);
- 
+
 svg2.append("g")
     .attr("class", "y axis")
     .call(d3.svg.axis().scale(y).orient("left"));
- 
+
 var path = svg2.append("g")
     .attr("clip-path", "url(#clip)")
   .append("path")

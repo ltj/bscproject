@@ -1,0 +1,90 @@
+doctype 5
+html(ng-app)
+
+  head
+    title= title
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
+    link(rel='stylesheet', href='/stylesheets/visuals.css')
+    script(src='/javascripts/angular.min.js')
+
+  body
+    script(src='/socket.io/socket.io.js')
+    script(src='http://d3js.org/d3.v3.min.js')
+    .container-fluid(ng-controller='PinCtrl')
+        .row-fluid
+            .span12
+                h2.well.well-small Dashboard
+            .row-fluid
+                .span12
+                    .btn-toolbar
+                        .btn-group
+                            button.btn.btn-small.btn-primary(ng-repeat='pin in analogPins',
+                                ng-disabled='pin.monitor', ng-click='setMonitor(pin)')
+                                {{pin.name}}
+                        .btn-group
+                            button.btn.btn-small.btn-inverse(ng-repeat='pin in digitalPins')
+                                {{pin.name}}
+        .row-fluid
+            .span12
+                #analog-accordion.accordion
+        //- .row-fluid
+        //-     .span12
+        //-         #analog-accordion.accordion
+        //-             .accordion-group(ng-repeat='pin in analogPins | filter: { monitor: true }')
+        //-                 .accordion-heading
+        //-                     a.accordion-toggle(data-toggle='collapse', 
+        //-                         data-parent='#analog-accordion', href='#'+'{{pin.name}}'+'-inner')
+        //-                             {{pin.name}}
+        //-                     div.accordion-body.collapse.in(id='{{pin.name}}'+'-inner')
+        //-                         .accordion-inner hello world
+        //-                             p 
+        //-                                 i.icon-remove-circle
+        .row-fluid
+            .span2.offset1
+                ul.unstyled
+                    li(ng-repeat='pin in analogPins')
+                        span.label.label-info {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Monitor
+                            input(type='checkbox', ng-model='pin.monitor', 
+                                ng-click='setMonitorPins()')
+            .span3
+                ul.unstyled
+                    li(ng-repeat='pin in digitalPins1')
+                        span.label {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Toggle
+                            input(type='checkbox',
+                                ng-model='pin.toggle',
+                                ng-disabled='pin.input',
+                                ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                        = ' '
+                        label.checkbox.inline Input
+                            input(type='checkbox',
+                                ng-model='pin.input',
+                                ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
+            .span3
+                ul.unstyled
+                    li(ng-repeat='pin in digitalPins2')
+                        span.label {{pin.name}}
+                        = ' '
+                        label.checkbox.inline Toggle
+                            input(type='checkbox',
+                                ng-model='pin.toggle',
+                                ng-disabled='pin.input',
+                                ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                        = ' '
+                        label.checkbox.inline Input
+                            input(type='checkbox',
+                                ng-model='pin.input',
+                                ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
+            .span3
+        .row-fluid
+            #dials.span3.offset1
+            #charts.span8
+
+    script(src='http://code.jquery.com/jquery.js')
+    script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/javascripts/dashboard.js')
+    script(src='/javascripts/pins.js')

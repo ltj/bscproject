@@ -5,7 +5,7 @@ var socket = io.connect('http://' + window.location.hostname);
 var meterdata = [];
 
 var width = 500,
-	height = 0,
+	height = 90,
 	twoPi = 2 * Math.PI,
 	progress = 0,
 	total = 1308573, // must be hard-coded if server doesn't report Content-Length
@@ -16,34 +16,50 @@ var arc = d3.svg.arc()
 	.innerRadius(30)
 	.outerRadius(40);
 
-var svg = d3.select("#dials").append("svg")
-	.attr("width", width)
-	.attr("height", height)
-	.append("g")
-	.attr("transform", "translate(" + 70 + "," + 60 + ")");
+var ana = d3.select("#analog-accordion");
 
 /*
  * Socket event handlers
  */
 socket.on('analog', function (data) {
 	meterdata = data.data;
-	updateDials();
+	updateAnalogVisuals();
 });
 
 /*
  * D3 visualizations
  */
-function updateDials() {
-	var canvas = d3.select("svg");
-	var meter = svg.selectAll("g").data(meterdata, function(d) { return d.pin; });
+function updateAnalogVisuals() {
+	var meter = ana.selectAll(".accordion-group").data(meterdata, function(d) { return d.pin; });
 
 	// enter
-	var enter = meter.enter().append("g")
-		.attr("transform", function(d, i) { return "translate(" + 0 + "," + i * 90 + ")"; })
+	var enter = meter.enter().append("div")
+		.attr("class", "accordion-group")
+		.append("div")
+		.attr("class", "accordion-heading")
+		.append("a")
+		.attr("class", "accordion-toggle")
+		.attr("data-toggle", "collapse")
+		.attr("data-parent", "#analog-accordion")
+		.attr("href", function(d) {
+			return "#" + d.pin + "-inner";
+		})
+		.text(function(d) {
+			return d.pin;
+		})
+		.append("div")
+		.attr("class", "accordion-body collapse in")
+		.attr("id", function(d){
+			return d.pin + "-inner";
+		})
+		.append("div")
+		.attr("class", "accordion-inner")
+		.append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		.append("g")
 		.attr("class", "analog-dial")
-		.each(function() {
-			canvas.attr("height", Number(canvas.attr("height")) + 100);
-		});
+		.attr("transform", "translate(" + 70 + "," + 45 + ")");
 
 	enter.append("path")
 		.attr("class", "background")
@@ -71,10 +87,6 @@ function updateDials() {
 		});
 
 	// update
-	meter.transition()
-		.duration(150)
-		.attr("transform", function(d, i) { return "translate(" + 0 + "," + i * 90 + ")"; });
-
 	meter.select(".foreground")
 		.attr("d", function(d) {
 			var endangle = (d.reading == 1023) ? twoPi : (twoPi / 1024) * d.reading;
@@ -87,13 +99,5 @@ function updateDials() {
 		});
 
 	// exit
-	meter.exit().remove()
-		.each(function() {
-			canvas.transition()
-				.duration(600).attr("height", Number(canvas.attr("height")) - 100);
-		});
-}
-
-function updateCharts() {
-
+	meter.exit().remove();
 }
