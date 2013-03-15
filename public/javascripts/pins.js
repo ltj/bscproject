@@ -58,7 +58,7 @@ function PinCtrl($scope) {
 
 		if(pins.length === 0) {
 			meterdata = [];
-			updateDials();
+			updateAnalogVisuals();
 		}
 	};
 
