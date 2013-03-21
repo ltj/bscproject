@@ -13,31 +13,59 @@ html(ng-app)
     script(src='http://d3js.org/d3.v3.min.js')
     .container-fluid(ng-controller='PinCtrl')
         .row-fluid
+            //- Header
             .span12
                 h2.well.well-small Dashboard
+            //- Pins button toolbars
             .row-fluid
-                .span12
+                .span3
+                    small Analog pins:
                     .btn-toolbar
                         .btn-group
                             button.btn.btn-small.btn-primary(ng-repeat='pin in analogPins',
                                 ng-disabled='pin.monitor', ng-click='setMonitor(pin)')
                                 {{pin.name}}
+                .span9
+                    small Digital pins:
+                    .btn-toolbar
                         .btn-group
-                            button.btn.btn-small.btn-inverse(ng-repeat='pin in digitalPins')
+                            button.btn.btn-small.btn-inverse(ng-repeat='pin in digitalPins',
+                                ng-disabled='pin.monitor', ng-click='pin.monitor = !pin.monitor')
                                 {{pin.name}}
+        //- Analog accordions
         .row-fluid
             .span12
                 #analog-accordion.accordion
-        //- .row-fluid
-        //-     .span12
-        //-         #analog-accordion.accordion
-        //-             .accordion-group(ng-repeat='pin in analogPins | filter: { monitor: true }')
-        //-                 .accordion-heading
-        //-                     a.accordion-toggle(data-toggle='collapse', 
-        //-                         data-parent='#analog-accordion', href='#'+'{{pin.name}}'+'-inner')
-        //-                             {{pin.name}}
-        //-                     div.accordion-body.collapse.in(id='{{pin.name}}'+'-inner')
-        //-                         .accordion-inner
+        //- Digital accordions
+        .row-fluid
+            .span12
+                #digital-accordion.accordion
+                    .accordion-group(ng-repeat='pin in digitalPins | filter: { monitor: true }')
+                        .accordion-heading
+                            a.accordion-toggle(data-toggle='collapse', 
+                                data-parent='#digital-accordion', href='#'+'{{pin.name}}'+'-inner')
+                                    {{pin.name}}
+                            div.accordion-body.collapse.in(id='{{pin.name}}'+'-inner')
+                                .accordion-inner
+                                    form
+                                        fieldset
+                                            label I/O
+                                            label.radio
+                                                input(type='radio', ng-model='pin.input', 
+                                                      value='true', ng-value='true',
+                                                      ng-change='pin.toggle = false; setPinMode(pin)') 
+                                                ='Input'
+                                            label.radio
+                                                input(type='radio', ng-model='pin.input', 
+                                                      value='out', ng-value='false',
+                                                      ng-change='pin.toggle = false; setPinMode(pin)')
+                                                ='Output'
+                                            label.checkbox
+                                                input(type='checkbox', ng-model='pin.toggle', 
+                                                      ng-disabled='pin.input', 
+                                                      ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                                                ='On/off'
+        //- Test stuff goes here
         .row-fluid
             .span2.offset1
                 ul.unstyled
@@ -49,7 +77,7 @@ html(ng-app)
                                 ng-click='setMonitorPins()')
             .span3
                 ul.unstyled
-                    li(ng-repeat='pin in digitalPins1')
+                    li(ng-repeat='pin in digitalPins')
                         span.label {{pin.name}}
                         = ' '
                         label.checkbox.inline Toggle
@@ -62,22 +90,7 @@ html(ng-app)
                             input(type='checkbox',
                                 ng-model='pin.input',
                                 ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
-            .span3
-                ul.unstyled
-                    li(ng-repeat='pin in digitalPins2')
-                        span.label {{pin.name}}
-                        = ' '
-                        label.checkbox.inline Toggle
-                            input(type='checkbox',
-                                ng-model='pin.toggle',
-                                ng-disabled='pin.input',
-                                ng-change='toggleDigitalPin(pin.value, pin.toggle)')
-                        = ' '
-                        label.checkbox.inline Input
-                            input(type='checkbox',
-                                ng-model='pin.input',
-                                ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
-            .span3
+            .span6
         .row-fluid
             #dials.span3.offset1
             #charts.span8

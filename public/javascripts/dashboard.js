@@ -52,6 +52,10 @@ socket.on('analog', function (data) {
     updateAnalogVisuals();
 });
 
+socket.on('digital', function (data) {
+    console.log(data);
+});
+
 /*
  * D3 visualizations
  */
