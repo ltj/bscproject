@@ -1,6 +1,7 @@
 /* ng controller for pin management */
 function PinCtrl($scope) {
 
+	// analog pins model
 	$scope.analogPins = [
 		{ name: 'A0', value: 0, monitor: false },
 		{ name: 'A1', value: 1, monitor: false },
@@ -9,6 +10,7 @@ function PinCtrl($scope) {
 		{ name: 'A4', value: 4, monitor: false },
 		{ name: 'A5', value: 5, monitor: false }];
 
+	// digital pins model
 	$scope.digitalPins = [
 		{ name: 'D0', value: 0, input: false, toggle: false },
 		{ name: 'D1', value: 1, input: false, toggle: false },
@@ -63,6 +65,11 @@ function PinCtrl($scope) {
 		var mode = pin.input ? 0x0 : 0x1;
 		socket.emit('pinmode', { pin: pin.value, mode: mode });
 		$scope.setDigitalReadPins();
+	};
+
+	$scope.getToggleClass = function (pin) {
+		var cls = pin.toggle ? "text-success" : "text-error";
+		return cls;
 	};
 
 }

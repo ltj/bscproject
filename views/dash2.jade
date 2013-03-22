@@ -43,28 +43,32 @@ html(ng-app)
                     .accordion-group(ng-repeat='pin in digitalPins | filter: { monitor: true }')
                         .accordion-heading
                             a.accordion-toggle(data-toggle='collapse', 
-                                data-parent='#digital-accordion', href='#'+'{{pin.name}}'+'-inner')
+                                href='#'+'{{pin.name}}'+'-inner')
                                     {{pin.name}}
-                            div.accordion-body.collapse.in(id='{{pin.name}}'+'-inner')
-                                .accordion-inner
-                                    form
-                                        fieldset
-                                            label I/O
-                                            label.radio
-                                                input(type='radio', ng-model='pin.input', 
-                                                      value='true', ng-value='true',
-                                                      ng-change='pin.toggle = false; setPinMode(pin)') 
-                                                ='Input'
-                                            label.radio
-                                                input(type='radio', ng-model='pin.input', 
-                                                      value='out', ng-value='false',
-                                                      ng-change='pin.toggle = false; setPinMode(pin)')
-                                                ='Output'
-                                            label.checkbox
-                                                input(type='checkbox', ng-model='pin.toggle', 
-                                                      ng-disabled='pin.input', 
-                                                      ng-change='toggleDigitalPin(pin.value, pin.toggle)')
-                                                ='On/off'
+                        .accordion-body.collapse.in(id='{{pin.name}}'+'-inner')
+                            .accordion-inner
+                                form.form-inline
+                                    label I/O
+                                    = ' '
+                                    label.radio
+                                        input(type='radio', ng-model='pin.input', 
+                                              value='true', ng-value='true',
+                                              ng-change='pin.toggle = false; setPinMode(pin)')
+                                        ='Input'
+                                    = ' '
+                                    label.radio
+                                        input(type='radio', ng-model='pin.input', 
+                                              value='out', ng-value='false',
+                                              ng-change='pin.toggle = false; setPinMode(pin)')
+                                        ='Output'
+                                    = ' '
+                                    label.checkbox
+                                        input(type='checkbox', ng-model='pin.toggle', 
+                                              ng-disabled='pin.input', 
+                                              ng-change='toggleDigitalPin(pin.value, pin.toggle)')
+                                        span(ng-class='getToggleClass(pin)')
+                                            ='On/off'
+                                .chartActive
         //- Test stuff goes here
         .row-fluid
             .span2.offset1
@@ -92,8 +96,7 @@ html(ng-app)
                                 ng-change='pin.toggle = false; toggleDigitalPin(pin.value, pin.toggle)')
             .span6
         .row-fluid
-            #dials.span3.offset1
-            #charts.span8
+            #digitalplace.span12
 
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')
