@@ -40,9 +40,17 @@ var y = d3.scale.linear()
     .domain([0, 1023])
     .range([gHeight, 0]);
 
+var cy = d3.scale.linear()
+    .domain([0, 1])
+    .rangeRound([gHeight, 0]);
+
 var line = d3.svg.line()
     .x(function(d, i) { return x(i); })
     .y(function(d, i) { return y(d); });
+
+var cline = d3.svg.line()
+    .x(function(d, i) { return x(i); })
+    .y(function(d, i) { return cy(d); });
 
 var ana = d3.select("#analog-accordion");
 var digi = d3.select("#digital-accordion");
@@ -65,6 +73,7 @@ socket.on('digital', function (data) {
         digitalLineData[digidata[i].pin].push(digidata[i].reading);
         if(digitalLineData[digidata[i].pin].length === n) digitalLineData[digidata[i].pin].shift();
     }
+    console.log(digidata);
     updateDigitalVisuals();
 });
 
@@ -179,47 +188,51 @@ function updateAnalogVisuals() {
 }
 
 function updateDigitalVisuals() {
-    var cspace = digi.selectAll(".chartActive");
-    var display = cspace.selectAll("svg").data(digidata, function(d) { return d.pin; });
 
-    // enter
-    var enter = display.enter().append("svg")
-        .attr("width", width)
-        .attr("height", height);
+    for(var i = 0; i < digidata.length; i++) {
+        var pindata = digidata[i];
+        var id = '#'+pindata.pin+"-chart";
+        console.log(id);
+        var container = d3.select('#'+pindata.pin+"-chart");
+        var chart = container.selectAll("svg").data([pindata]);
 
-    var graph = enter.append("g")
-        .attr("transform", "translate(" + (margin.left + 110) + "," + margin.top + ")");
+        // enter
+        var enter = chart.enter().append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-    graph.append("defs").append("clipPath")
-        .attr("id", "clip")
-        .append("rect")
-        .attr("width", gWidth)
-        .attr("height", gHeight);
+        var graph = enter.append("g")
+            .attr("transform", "translate(" + (margin.left) + "," + margin.top + ")");
 
-    graph.append("g")
-        .attr("class", "y axis")
-        .call(d3.svg.axis().scale(y).orient("left"));
+        graph.append("defs").append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", gWidth)
+            .attr("height", gHeight);
 
-    var path = graph.append("g")
-        .attr("clip-path", "url(#clip)")
-        .append("path")
-        .datum(function(d) {
-            return digitalLineData[d.pin];
-        })
-        .attr("class", "line")
-        .attr("d", line);
+        graph.append("g")
+            .attr("class", "y axis")
+            .call(d3.svg.axis().scale(cy).orient("left"));
 
-    // update
-    meter.select(".line").datum(function(d) {
-            return digitalLineData[d.pin];
-        })
-        .attr("d", line)
-        .attr("transform", null)
-        .transition()
-        .duration(500)
-        .ease("linear")
-        .attr("transform", "translate(" + x(-1) + ")");
+        var path = graph.append("g")
+            .attr("clip-path", "url(#clip)")
+            .append("path")
+            .datum(function(d) {
+                return digitalLineData[d.pin];
+            })
+            .attr("class", "line")
+            .attr("d", cline);
 
-    // exit
-    meter.exit().remove();
+        // update
+        chart.select(".line").datum(function(d) {
+                return digitalLineData[d.pin];
+            })
+            .attr("d", cline)
+            .attr("transform", null)
+            .transition()
+            .duration(500)
+            .ease("linear")
+            .attr("transform", "translate(" + x(-1) + ")");
+    }
+
 }

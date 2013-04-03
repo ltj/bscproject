@@ -43,23 +43,26 @@ server.listen(app.get('port'), function(){
 /*  Reflecta/socket controller section. Should be put into own module
  *  at some point.
  */
-var analogMonitorInterval,
-    digitalMonitorInterval,
+var monitorTimeout,
+    monAnalog,
+    monDigital,
     analogMonitorPins = [],
     digitalMonitorPins = [];
 
 // websockets connection and events
 io.sockets.on('connection', function (socket) {
   socket.on('aread', function (data) {
-    if(analogMonitorInterval) clearInterval(analogMonitorInterval);
+    if(monitorTimeout) clearTimeout(monitorTimeout);
     analogMonitorPins = data.pins;
-    if(data.pins.length !== 0) monitorAnalog(socket);
+    monAnalog = data.pins.length !== 0;
+    monitorPins(socket);
   });
 
   socket.on('dread', function (data) {
-    if(digitalMonitorInterval) clearInterval(digitalMonitorInterval);
+    if(monitorTimeout) clearTimeout(monitorTimeout);
     digitalMonitorPins = data.pins;
-    if(data.pins.length !== 0) monitorDigital(socket);
+    monDigital = data.pins.length !== 0;
+    monitorPins(socket);
   });
 
   socket.on('dwrite', function (data) {
@@ -93,17 +96,30 @@ board.on('ready', function() {
 });
 
 // start analog pin monitor using async
-function monitorAnalog(socket) {
-  analogMonitorInterval = setInterval(function() {
-    async.mapSeries(analogMonitorPins, queryAnalogPin, function(err, results) {
-      if(err) {
-        console.log(err);
-      }
-      else {
-        socket.emit('analog', {data: results});
-      }
-    });
-  }, 100);
+function monitorPins(socket) {
+  monitorTimeout = setTimeout(function() {
+    if(monAnalog) {
+      async.mapSeries(analogMonitorPins, queryAnalogPin, function(err, results) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+          socket.emit('analog', {data: results});
+        }
+      });
+    }
+    if(monDigital) {
+      async.mapSeries(digitalMonitorPins, queryDigitalPin, function(err, results) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+          socket.emit('digital', {data: results});
+        }
+      });
+    }
+    monitorPins(socket);
+    }, 100);
 }
 
 // analogRead with callback to async
@@ -111,20 +127,6 @@ function queryAnalogPin(pin, callback) {
   board.ardu1.analogRead(pin, function(val) {
     callback(null, {pin: 'A'+pin, reading: val});
   });
-}
-
-// start digital pin monitor using async
-function monitorDigital(socket) {
-  digitalMonitorInterval = setInterval(function() {
-    async.mapSeries(digitalMonitorPins, queryDigitalPin, function(err, results) {
-      if(err) {
-        console.log(err);
-      }
-      else {
-        socket.emit('digital', {data: results});
-      }
-    });
-  }, 100);
 }
 
 // digitalRead with callback to async

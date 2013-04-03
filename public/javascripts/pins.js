@@ -65,6 +65,11 @@ function PinCtrl($scope) {
 		var mode = pin.input ? 0x0 : 0x1;
 		socket.emit('pinmode', { pin: pin.value, mode: mode });
 		$scope.setDigitalReadPins();
+
+		// remove chart if mode changed to output
+		if(!pin.input) {
+			d3.select('#'+pin.name+"-chart").select('svg').remove();
+		}
 	};
 
 	$scope.getToggleClass = function (pin) {

@@ -68,7 +68,7 @@ html(ng-app)
                                               ng-change='toggleDigitalPin(pin.value, pin.toggle)')
                                         span(ng-class='getToggleClass(pin)')
                                             ='On/off'
-                                .chartActive
+                                div.dchart(id='{{pin.name}}'+'-chart')
         //- Test stuff goes here
         .row-fluid
             .span2.offset1
