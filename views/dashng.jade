@@ -1,0 +1,24 @@
+doctype 5
+html
+    head
+        title= title
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
+    body
+        .container-fluid
+            .row-fluid
+                //- Header
+                .span12
+                    h2 Arduino Dashboard*
+            .row-fluid
+                .span12.statusbar
+                    .pull-right.text-error Status messages
+            .row-fluid
+                .span4.analog-pins
+                    p Analog pins goes here
+                .span4
+                    p Digital pins goes here
+                .span4.digital-pins
+
+        script(src='http://code.jquery.com/jquery.js')
+        script(src='/bootstrap/js/bootstrap.min.js')

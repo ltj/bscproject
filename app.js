@@ -4,7 +4,7 @@ var config = require('./config'),
     routes = require('./routes'),
     http = require('http'),
     path = require('path'),
-    reflecta = require('reflecta'),
+    firmata = require('firmata'),
     async = require('async');
 
 var app = express();
@@ -49,22 +49,9 @@ var monitorTimeout,
     analogMonitorPins = [],
     digitalMonitorPins = [];
 
+
 // websockets connection and events
 io.sockets.on('connection', function (socket) {
-  socket.on('aread', function (data) {
-    if(monitorTimeout) clearTimeout(monitorTimeout);
-    analogMonitorPins = data.pins;
-    monAnalog = data.pins.length !== 0;
-    monitorPins(socket);
-  });
-
-  socket.on('dread', function (data) {
-    if(monitorTimeout) clearTimeout(monitorTimeout);
-    digitalMonitorPins = data.pins;
-    monDigital = data.pins.length !== 0;
-    monitorPins(socket);
-  });
-
   socket.on('dwrite', function (data) {
     board.ardu1.digitalWrite(data.pin, data.val);
   });
@@ -76,62 +63,26 @@ io.sockets.on('connection', function (socket) {
 });
 
 // setup new board
-var board = new reflecta.Board(config.serial.device, 
-  { baudrate: config.serial.baudrate, delay: config.serial.delay });
-
-var ready = false;
-// reflecta events
-board.on('error', function(error) {
-  console.log("error " + error);
-});
-
-board.on('warning', function(warn) {
-  console.log("warning " + warn);
-});
-
-board.on('ready', function() {
-  if(board.ardu1) {
-    console.log("Arduino connected.");
+var board = new firmata.Board(config.serial.device, function(err) {
+  if (err) {
+    console.log(err);
+    return;
   }
+  console.log('Arduino connected');
+  console.log('Firmware: ' + board.firmware.name + '-' +
+              board.firmware.version.major + '.' + board.firmware.version.minor);
+
+  board.pinMode(2, board.MODES.INPUT);
+  board.reportVersion(function(ver) {
+    console.log(ver);
+  });
 });
 
-// start analog pin monitor using async
-function monitorPins(socket) {
-  monitorTimeout = setTimeout(function() {
-    if(monAnalog) {
-      async.mapSeries(analogMonitorPins, queryAnalogPin, function(err, results) {
-        if(err) {
-          console.log(err);
-        }
-        else {
-          socket.emit('analog', {data: results});
-        }
-      });
-    }
-    if(monDigital) {
-      async.mapSeries(digitalMonitorPins, queryDigitalPin, function(err, results) {
-        if(err) {
-          console.log(err);
-        }
-        else {
-          socket.emit('digital', {data: results});
-        }
-      });
-    }
-    monitorPins(socket);
-    }, 100);
-}
+// firmata events
+// board.on('analog-read', function (data) {
+//   io.sockets.emit('analog-read', data);
+// });
 
-// analogRead with callback to async
-function queryAnalogPin(pin, callback) {
-  board.ardu1.analogRead(pin, function(val) {
-    callback(null, {pin: 'A'+pin, reading: val});
-  });
-}
-
-// digitalRead with callback to async
-function queryDigitalPin(pin, callback) {
-  board.ardu1.digitalRead(pin, function(val) {
-    callback(null, {pin: 'D'+pin, reading: val});
-  });
-}
+board.on('digital-read', function (data) {
+  io.sockets.emit('digital-read', data);
+});

@@ -17,8 +17,9 @@ exports.test = function(req, res){
 
 /*
  * GET dashboard.
+ * Set to page currently in use (testing)
  */
 
 exports.dash = function(req, res){
-  res.render('dash2', { title: 'Dashboard' });
+  res.render('dashng', { title: 'Dashboard' });
 };

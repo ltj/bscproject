@@ -67,6 +67,14 @@ socket.on('analog', function (data) {
     updateAnalogVisuals();
 });
 
+socket.on('analog-read', function (data) {
+    console.log(data);
+});
+
+socket.on('digital-read', function (data) {
+    console.log(data);
+});
+
 socket.on('digital', function (data) {
     digidata = data.data;
     for(var i = 0; i < digidata.length; i++) {
