@@ -78,12 +78,9 @@ io.sockets.on('connection', function (socket) {
       }
     });
 
-    socket.on('query-pins', function(data) {
-      socket.emit('board-pins', board.pins);
-    });
-
     socket.on('digital-write', function(data) {
       board.digitalWrite(data.pin, data.value);
+      socket.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
 });

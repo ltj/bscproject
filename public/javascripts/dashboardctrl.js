@@ -22,7 +22,6 @@ function DashboardCtrl($scope) {
 		if(pin.value === 1) {
 			socket.emit('digital-write', { pin: name, value: 0 });
 		}
-		socket.emit('query-pins', {});
 	};
 
 	$scope.toggleText = function(pin) {

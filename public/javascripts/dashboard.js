@@ -78,6 +78,12 @@ socket.on('board-pins', function(data) {
     scope.$apply( function() { scope.pins = data; });
 });
 
+socket.on('pin-update', function(data) {
+    console.log(data);
+    var scope  = angular.element($('.container-fluid')).scope();
+    scope.$apply( function() { scope.pins[data.pin] = data.obj; });
+});
+
 socket.on('analog', function (data) {
     meterdata = data.data;
     for(var i = 0; i < meterdata.length; i++) {

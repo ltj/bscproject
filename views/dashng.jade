@@ -17,27 +17,28 @@ html(ng-app)
                 .span12.statusbar.well.well-small
                     #status-msg.pull-right
             .row-fluid
-                .span4.analog-pins
+                .span6.analog-pins
+                    h4 Analog pins
                     #analog-accordion.accordion
                         .accordion-group(ng-repeat='pin in pins | filter:isAnalog')
                             .accordion-heading
                                 a.accordion-toggle(data-toggle='collapse', 
-                                    href='#'+'{{$index}}'+'-inner')
+                                    href='#A'+'{{$index}}'+'-inner')
                                         {{'A' + $index}}
-                            .accordion-body.collapse.in(id='{{$index}}'+'-inner')
+                            .accordion-body.collapse.in(id='A'+'{{$index}}'+'-inner')
                                 .accordion-inner hello
-                .span4
+                .span6.digital-pins
+                    h4 Digital pins
                     #digital-accordion.accordion
                         .accordion-group(ng-repeat='pin in pins | filter:isDigital')
                             .accordion-heading
                                 a.accordion-toggle(data-toggle='collapse', 
-                                    href='#'+'{{$index}}'+'-inner')
+                                    href='#D'+'{{$index}}'+'-inner')
                                         {{'D' + ($index + 2)}}
-                            .accordion-body.collapse.in(id='{{$index}}'+'-inner')
+                            .accordion-body.collapse.in(id='D'+'{{$index}}'+'-inner')
                                 .accordion-inner
                                     button.btn.btn-small(ng-click='togglePin(pin, ($index + 2))')
                                         {{toggleText(pin)}}
-                .span4.digital-pins
 
         script(src='http://code.jquery.com/jquery.js')
         script(src='/bootstrap/js/bootstrap.min.js')
