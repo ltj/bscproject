@@ -2,6 +2,7 @@
  * Setup socket and d3 environment
  */
 var socket = io.connect('http://' + window.location.hostname);
+
 var meterdata = [],
     digidata = [],
     n = 100,
@@ -58,6 +59,25 @@ var digi = d3.select("#digital-accordion");
 /*
  * Socket event handlers
  */
+socket.on('board-status', function(data) {
+    if(data.version !== undefined) {
+        console.log(data.version.major + "." + data.version.minor);
+        console.log(data.name);
+        $('#status-msg').addClass('text-success').
+        text('Arduino connected: ' + data.name + ' v' + data.version.major + "." + data.version.minor);
+    }
+    else {
+        console.log(data);
+        $('#status-msg').addClass('text-error').text(data.errmsg);
+    }
+});
+
+socket.on('board-pins', function(data) {
+    console.log(data);
+    var scope  = angular.element($('.container-fluid')).scope();
+    scope.$apply( function() { scope.pins = data; });
+});
+
 socket.on('analog', function (data) {
     meterdata = data.data;
     for(var i = 0; i < meterdata.length; i++) {
@@ -68,11 +88,11 @@ socket.on('analog', function (data) {
 });
 
 socket.on('analog-read', function (data) {
-    console.log(data);
+    //console.log(data);
 });
 
 socket.on('digital-read', function (data) {
-    console.log(data);
+    //console.log(data);
 });
 
 socket.on('digital', function (data) {
@@ -84,6 +104,9 @@ socket.on('digital', function (data) {
     console.log(digidata);
     updateDigitalVisuals();
 });
+
+// query status
+socket.emit('get-status', {});
 
 /*
  * D3 visualizations

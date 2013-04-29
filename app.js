@@ -46,42 +46,52 @@ server.listen(app.get('port'), function(){
 var monitorTimeout,
     monAnalog,
     monDigital,
+    boardError,
     analogMonitorPins = [],
     digitalMonitorPins = [];
-
-
-// websockets connection and events
-io.sockets.on('connection', function (socket) {
-  socket.on('dwrite', function (data) {
-    board.ardu1.digitalWrite(data.pin, data.val);
-  });
-
-  socket.on('pinmode', function (data) {
-    console.log("pinmode called " + data.pin + " " + data.mode);
-    board.ardu1.pinMode(data.pin, data.mode);
-  });
-});
 
 // setup new board
 var board = new firmata.Board(config.serial.device, function(err) {
   if (err) {
-    console.log(err);
+    boardError = err;
+    console.log("Firmata error: " + err);
     return;
   }
   console.log('Arduino connected');
   console.log('Firmware: ' + board.firmware.name + '-' +
               board.firmware.version.major + '.' + board.firmware.version.minor);
 
-  board.pinMode(2, board.MODES.INPUT);
-  board.reportVersion(function(ver) {
-    console.log(ver);
-  });
+});
+
+// websockets connection and events
+io.sockets.on('connection', function (socket) {
+
+    socket.on('get-status', function(data) {
+      if(typeof(board) == 'object' && board.versionReceived) {
+        var firmware = 'Firmware: ' + board.firmware.name + '-' +
+                        board.firmware.version.major + '.' + board.firmware.version.minor;
+        socket.emit('board-status', board.firmware);
+        socket.emit('board-pins', board.pins);
+      }
+      else {
+        socket.emit('board-status', { errmsg: boardError.toString() });
+      }
+    });
+
+    socket.on('query-pins', function(data) {
+      socket.emit('board-pins', board.pins);
+    });
+
+    socket.on('digital-write', function(data) {
+      board.digitalWrite(data.pin, data.value);
+    });
+
 });
 
 // firmata events
-// board.on('analog-read', function (data) {
-//   io.sockets.emit('analog-read', data);
-// });
+board.on('analog-read', function (data) {
+  io.sockets.emit('analog-read', data);
+});
 
 board.on('digital-read', function (data) {
   io.sockets.emit('digital-read', data);

@@ -1,24 +1,45 @@
 doctype 5
-html
+html(ng-app)
     head
         title= title
         meta(name='viewport', content='width=device-width, initial-scale=1.0')
         link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
+        script(src='/javascripts/angular.min.js')
     body
-        .container-fluid
+        script(src='/socket.io/socket.io.js')
+        script(src='http://d3js.org/d3.v3.min.js')
+        .container-fluid(ng-controller='DashboardCtrl')
             .row-fluid
                 //- Header
                 .span12
                     h2 Arduino Dashboard*
             .row-fluid
-                .span12.statusbar
-                    .pull-right.text-error Status messages
+                .span12.statusbar.well.well-small
+                    #status-msg.pull-right
             .row-fluid
                 .span4.analog-pins
-                    p Analog pins goes here
+                    #analog-accordion.accordion
+                        .accordion-group(ng-repeat='pin in pins | filter:isAnalog')
+                            .accordion-heading
+                                a.accordion-toggle(data-toggle='collapse', 
+                                    href='#'+'{{$index}}'+'-inner')
+                                        {{'A' + $index}}
+                            .accordion-body.collapse.in(id='{{$index}}'+'-inner')
+                                .accordion-inner hello
                 .span4
-                    p Digital pins goes here
+                    #digital-accordion.accordion
+                        .accordion-group(ng-repeat='pin in pins | filter:isDigital')
+                            .accordion-heading
+                                a.accordion-toggle(data-toggle='collapse', 
+                                    href='#'+'{{$index}}'+'-inner')
+                                        {{'D' + ($index + 2)}}
+                            .accordion-body.collapse.in(id='{{$index}}'+'-inner')
+                                .accordion-inner
+                                    button.btn.btn-small(ng-click='togglePin(pin, ($index + 2))')
+                                        {{toggleText(pin)}}
                 .span4.digital-pins
 
         script(src='http://code.jquery.com/jquery.js')
         script(src='/bootstrap/js/bootstrap.min.js')
+        script(src='/javascripts/dashboard.js')
+        script(src='/javascripts/dashboardctrl.js')
