@@ -37,8 +37,20 @@ html(ng-app)
                                         {{'D' + ($index + 2)}}
                             .accordion-body.collapse.in(id='D'+'{{$index}}'+'-inner')
                                 .accordion-inner
-                                    button.btn.btn-small(ng-click='togglePin(pin, ($index + 2))')
-                                        {{toggleText(pin)}}
+                                    form.form-inline
+                                        select.input-small(ng-model='pin.mode', 
+                                                           ng-options='modes[m] for m in pin.supportedModes',
+                                                           ng-change='setPinMode(pin, ($index + 2))')
+                                        =' '
+                                        button.btn.btn-small(ng-click='togglePin(pin, ($index + 2))', 
+                                                             ng-disabled='pinNotOutput(pin)',
+                                                             ng-hide='pinIsAdjustable(pin)')
+                                            {{toggleText(pin)}}
+                                        =' '
+                                        input.input-small(type='range', min='0', max='255',
+                                                          ng-model='pin.value',
+                                                          ng-hide='!pinIsAdjustable(pin)',
+                                                          ng-change='adjustPinValue(pin, ($index + 2))')
 
         script(src='http://code.jquery.com/jquery.js')
         script(src='/bootstrap/js/bootstrap.min.js')

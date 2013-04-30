@@ -59,6 +59,7 @@ var digi = d3.select("#digital-accordion");
 /*
  * Socket event handlers
  */
+
 socket.on('board-status', function(data) {
     if(data.version !== undefined) {
         console.log(data.version.major + "." + data.version.minor);
@@ -73,13 +74,11 @@ socket.on('board-status', function(data) {
 });
 
 socket.on('board-pins', function(data) {
-    console.log(data);
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins = data; });
 });
 
 socket.on('pin-update', function(data) {
-    console.log(data);
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins[data.pin] = data.obj; });
 });
@@ -98,7 +97,9 @@ socket.on('analog-read', function (data) {
 });
 
 socket.on('digital-read', function (data) {
-    //console.log(data);
+    console.log(data);
+    var scope  = angular.element($('.container-fluid')).scope();
+    scope.$apply( function() { scope.pins[data.pin].value = data.value; });
 });
 
 socket.on('digital', function (data) {

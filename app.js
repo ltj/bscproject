@@ -83,6 +83,19 @@ io.sockets.on('connection', function (socket) {
       socket.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
+    socket.on('pin-mode', function(data) {
+      board.pinMode(data.pin, data.mode);
+      socket.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+    });
+
+    socket.on('analog-write', function(data) {
+      board.analogWrite(data.pin, data.value);
+    });
+
+    socket.on('servo-write', function(data) {
+      board.servoWrite(data.pin, data.value);
+    });
+
 });
 
 // firmata events
