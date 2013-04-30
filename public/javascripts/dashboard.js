@@ -20,7 +20,7 @@ for(var i = 0; i < 14; i++) {
     digitalLineData[pin] = [0];
 }
 
-var width = 500,
+var width = 300,
     height = 90,
     twoPi = 2 * Math.PI;
 
@@ -93,11 +93,11 @@ socket.on('analog', function (data) {
 });
 
 socket.on('analog-read', function (data) {
-    //console.log(data);
+    var scope  = angular.element($('.container-fluid')).scope();
+    scope.$apply( function() { scope.pins[data.pin].value = data.value; });
 });
 
 socket.on('digital-read', function (data) {
-    console.log(data);
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins[data.pin].value = data.value; });
 });

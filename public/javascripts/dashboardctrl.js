@@ -4,6 +4,10 @@ function DashboardCtrl($scope) {
 	// pins model
 	//$scope.pins = [];
 
+	// som svg parameters
+	$scope.width = 300;
+	$scope.height = 90;
+
 	// modes
 	$scope.modes = [
 		'Input',
@@ -16,6 +20,11 @@ function DashboardCtrl($scope) {
 	// check if pin is not output
 	$scope.pinNotOutput = function(pin) {
 		return pin.mode !== 1;
+	};
+
+	// check if pin is not input
+	$scope.pinNotInput = function(pin) {
+		return pin.mode !== 0;
 	};
 
 	// check if pin is adjustable (PWM or servo output)
