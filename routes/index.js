@@ -21,5 +21,5 @@ exports.test = function(req, res){
  */
 
 exports.dash = function(req, res){
-  res.render('dashng', { title: 'Dashboard' });
+  res.render('dashboard', { title: 'Dashboard' });
 };

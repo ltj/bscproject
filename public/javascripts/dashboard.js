@@ -3,24 +3,15 @@
  */
 var socket = io.connect('http://' + window.location.hostname);
 
-var meterdata = [],
+var anadata = [],
     digidata = [],
     n = 100,
     analogLineData = [],
-    digitalLineData = [];
+    digitalLineData = [],
+    init = false,
+    offset = 2;
 
-// initialize line data
-for(var i = 0; i < 6; i++) {
-    var pin = 'A'+i;
-    analogLineData[pin] = [0];
-}
-
-for(var i = 0; i < 14; i++) {
-    var pin = 'D'+i;
-    digitalLineData[pin] = [0];
-}
-
-var width = 300,
+var width = 400,
     height = 90,
     twoPi = 2 * Math.PI;
 
@@ -53,17 +44,12 @@ var cline = d3.svg.line()
     .x(function(d, i) { return x(i); })
     .y(function(d, i) { return cy(d); });
 
-var ana = d3.select("#analog-accordion");
-var digi = d3.select("#digital-accordion");
-
 /*
  * Socket event handlers
  */
 
 socket.on('board-status', function(data) {
     if(data.version !== undefined) {
-        console.log(data.version.major + "." + data.version.minor);
-        console.log(data.name);
         $('#status-msg').addClass('text-success').
         text('Arduino connected: ' + data.name + ' v' + data.version.major + "." + data.version.minor);
     }
@@ -76,6 +62,22 @@ socket.on('board-status', function(data) {
 socket.on('board-pins', function(data) {
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins = data; });
+    // initialize d3 data arrays the first time
+    if(! init) {
+        for(var i = 0; i < data.length; i++) {
+            //digital pins
+            if(data[i].analogChannel === 127) {
+                digidata[i] = {pin: i, value: 0};
+                digitalLineData[i] = [0];
+            }
+            // analog pins
+            if(data[i].analogChannel !== 127) {
+                anadata[data[i].analogChannel] = {pin: data[i].analogChannel, value: 0};
+                analogLineData[data[i].analogChannel] = [0];
+            }
+        }
+        init = true;
+    }
 });
 
 socket.on('pin-update', function(data) {
@@ -83,33 +85,22 @@ socket.on('pin-update', function(data) {
     scope.$apply( function() { scope.pins[data.pin] = data.obj; });
 });
 
-socket.on('analog', function (data) {
-    meterdata = data.data;
-    for(var i = 0; i < meterdata.length; i++) {
-        analogLineData[meterdata[i].pin].push(meterdata[i].reading);
-        if(analogLineData[meterdata[i].pin].length === n) analogLineData[meterdata[i].pin].shift();
-    }
-    updateAnalogVisuals();
-});
-
 socket.on('analog-read', function (data) {
-    var scope  = angular.element($('.container-fluid')).scope();
-    scope.$apply( function() { scope.pins[data.pin].value = data.value; });
+    if(init) {
+        // update visualizations
+        anadata[data.pin].value = data.value;
+        analogLineData[data.pin].push(data.value);
+        if(analogLineData[data.pin].length === n) analogLineData[data.pin].shift();
+        updateAnalogVisuals();
+    }
 });
 
 socket.on('digital-read', function (data) {
-    var scope  = angular.element($('.container-fluid')).scope();
-    scope.$apply( function() { scope.pins[data.pin].value = data.value; });
-});
-
-socket.on('digital', function (data) {
-    digidata = data.data;
-    for(var i = 0; i < digidata.length; i++) {
-        digitalLineData[digidata[i].pin].push(digidata[i].reading);
-        if(digitalLineData[digidata[i].pin].length === n) digitalLineData[digidata[i].pin].shift();
+    if(init) {
+        // update model
+        var scope  = angular.element($('.container-fluid')).scope();
+        scope.$apply( function() { scope.pins[data.pin].value = data.value; });
     }
-    console.log(digidata);
-    updateDigitalVisuals();
 });
 
 // query status
@@ -119,119 +110,10 @@ socket.emit('get-status', {});
  * D3 visualizations
  */
 function updateAnalogVisuals() {
-    var meter = ana.selectAll(".accordion-group").data(meterdata, function(d) { return d.pin; });
 
-    // enter
-    var entergroup = meter.enter().append("div")
-        .attr("class", "accordion-group");
-
-    var enterhead = entergroup.append("div")
-        .attr("class", "accordion-heading")
-        .append("a")
-        .attr("class", "accordion-toggle")
-        .attr("data-toggle", "collapse")
-        .attr("href", function(d) {
-            return "#" + d.pin + "-inner";
-        })
-        .text(function(d) {
-            return d.pin;
-        });
-
-    var enter = entergroup.append("div")
-        .attr("class", "accordion-body collapse in")
-        .attr("id", function(d){
-            return d.pin + "-inner";
-        })
-        .append("div")
-        .attr("class", "accordion-inner")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
-    var dial = enter.append("g")
-        .attr("class", "analog-dial")
-        .attr("transform", "translate(" + 70 + "," + 45 + ")");
-
-    dial.append("path")
-        .attr("class", "background")
-        .attr("d", arc.endAngle(twoPi));
-
-    dial.append("path")
-        .attr("class", "foreground")
-        .attr("d", function(d) {
-            var endangle = (d.reading == 1023) ? twoPi : (twoPi / 1024) * d.reading;
-            return arc.endAngle(endangle)();
-        });
-
-    dial.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", ".35em")
-        .text(function(d) {
-            return d.reading;
-        });
-
-    dial.append("text")
-        .attr("x", "-70")
-        .attr("dy", ".35em")
-        .text(function(d) {
-            return d.pin;
-        });
-
-    var graph = enter.append("g")
-        .attr("transform", "translate(" + (margin.left + 110) + "," + margin.top + ")");
-
-    graph.append("defs").append("clipPath")
-        .attr("id", "clip")
-        .append("rect")
-        .attr("width", gWidth)
-        .attr("height", gHeight);
-
-    graph.append("g")
-        .attr("class", "y axis")
-        .call(d3.svg.axis().scale(y).orient("left"));
-
-    var path = graph.append("g")
-        .attr("clip-path", "url(#clip)")
-        .append("path")
-        .datum(function(d) {
-            return analogLineData[d.pin];
-        })
-        .attr("class", "line")
-        .attr("d", line);
-
-    // update
-    meter.select(".foreground")
-        .attr("d", function(d) {
-            var endangle = (d.reading == 1023) ? twoPi : (twoPi / 1024) * d.reading;
-            return arc.endAngle(endangle)();
-        });
-
-    meter.select("text")
-        .text(function(d) {
-            return d.reading;
-        });
-
-    meter.select(".line").datum(function(d) {
-            return analogLineData[d.pin];
-        })
-        .attr("d", line)
-        .attr("transform", null)
-        .transition()
-        .duration(500)
-        .ease("linear")
-        .attr("transform", "translate(" + x(-1) + ")");
-
-    // exit
-    meter.exit().remove();
-}
-
-function updateDigitalVisuals() {
-
-    for(var i = 0; i < digidata.length; i++) {
-        var pindata = digidata[i];
-        var id = '#'+pindata.pin+"-chart";
-        console.log(id);
-        var container = d3.select('#'+pindata.pin+"-chart");
+    for(var i = 0; i < anadata.length; i++) {
+        var pindata = anadata[i];
+        var container = d3.select('#achart' + anadata[i].pin);
         var chart = container.selectAll("svg").data([pindata]);
 
         // enter
@@ -239,8 +121,30 @@ function updateDigitalVisuals() {
             .attr("width", width)
             .attr("height", height);
 
+        var dial = enter.append("g")
+            .attr("class", "analog-dial")
+            .attr("transform", "translate(" + 50 + "," + 45 + ")");
+
+        dial.append("path")
+            .attr("class", "background")
+            .attr("d", arc.endAngle(twoPi));
+
+        dial.append("path")
+            .attr("class", "foreground")
+            .attr("d", function(d) {
+                var endangle = (d.value == 1023) ? twoPi : (twoPi / 1024) * d.value;
+                return arc.endAngle(endangle)();
+            });
+
+        dial.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", ".35em")
+            .text(function(d) {
+                return d.value;
+            });
+
         var graph = enter.append("g")
-            .attr("transform", "translate(" + (margin.left) + "," + margin.top + ")");
+            .attr("transform", "translate(" + (margin.left + 110) + "," + margin.top + ")");
 
         graph.append("defs").append("clipPath")
             .attr("id", "clip")
@@ -250,27 +154,38 @@ function updateDigitalVisuals() {
 
         graph.append("g")
             .attr("class", "y axis")
-            .call(d3.svg.axis().scale(cy).orient("left"));
+            .call(d3.svg.axis().scale(y).orient("left"));
 
         var path = graph.append("g")
             .attr("clip-path", "url(#clip)")
             .append("path")
             .datum(function(d) {
-                return digitalLineData[d.pin];
+                return analogLineData[d.pin];
             })
             .attr("class", "line")
-            .attr("d", cline);
+            .attr("d", line);
 
         // update
+        chart.select(".foreground")
+            .attr("d", function(d) {
+                var endangle = (d.value == 1023) ? twoPi : (twoPi / 1024) * d.value;
+                return arc.endAngle(endangle)();
+            });
+
+        chart.select("text")
+            .text(function(d) {
+                return d.value;
+            });
+
         chart.select(".line").datum(function(d) {
-                return digitalLineData[d.pin];
+                return analogLineData[d.pin];
             })
-            .attr("d", cline)
+            .attr("d", line)
             .attr("transform", null)
             .transition()
             .duration(500)
             .ease("linear")
             .attr("transform", "translate(" + x(-1) + ")");
-    }
 
+    }
 }
