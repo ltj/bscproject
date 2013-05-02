@@ -128,7 +128,22 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('reset-board', function(data) {
+
       board.reset();
+      setTimeout(function() {
+        board.reportVersion(function() {
+          board.queryFirmware(function() {
+            board.queryCapabilities(function() {
+              board.queryAnalogMapping(function() {
+                console.info('back from reset!');
+              });
+            });
+          });
+        });
+      }, 200);
+
+      board.setSamplingInterval(100);
+
     });
 
 });
