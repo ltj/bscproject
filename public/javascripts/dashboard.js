@@ -76,6 +76,7 @@ socket.on('board-pins', function(data) {
                 analogLineData[data[i].analogChannel] = [0];
             }
         }
+        setupAnalogVisuals();
         init = true;
     }
 });
@@ -90,8 +91,9 @@ socket.on('analog-read', function (data) {
         // update visualizations
         anadata[data.pin].value = data.value;
         analogLineData[data.pin].push(data.value);
+        // we only want n samples at any time
         if(analogLineData[data.pin].length === n) analogLineData[data.pin].shift();
-        updateAnalogVisuals();
+        updateAnalogVisuals(data.pin);
     }
 });
 
@@ -109,8 +111,7 @@ socket.emit('get-status', {});
 /*
  * D3 visualizations
  */
-function updateAnalogVisuals() {
-
+function setupAnalogVisuals() {
     for(var i = 0; i < anadata.length; i++) {
         var pindata = anadata[i];
         var container = d3.select('#achart' + anadata[i].pin);
@@ -131,18 +132,12 @@ function updateAnalogVisuals() {
 
         dial.append("path")
             .attr("class", "foreground")
-            .attr("d", function(d) {
-                var endangle = (d.value == 1023) ? twoPi : (twoPi / 1024) * d.value;
-                return arc.endAngle(endangle)();
-            });
+            .attr("d", 0);
 
         dial.append("text")
             .attr("text-anchor", "middle")
             .attr("dy", ".35em")
-            .text(function(d) {
-                return d.value;
-            });
-
+            .text(0);
         var graph = enter.append("g")
             .attr("transform", "translate(" + (margin.left + 110) + "," + margin.top + ")");
 
@@ -159,33 +154,37 @@ function updateAnalogVisuals() {
         var path = graph.append("g")
             .attr("clip-path", "url(#clip)")
             .append("path")
-            .datum(function(d) {
-                return analogLineData[d.pin];
-            })
+            .datum(0)
             .attr("class", "line")
             .attr("d", line);
+        }
+}
 
-        // update
-        chart.select(".foreground")
-            .attr("d", function(d) {
-                var endangle = (d.value == 1023) ? twoPi : (twoPi / 1024) * d.value;
-                return arc.endAngle(endangle)();
-            });
+function updateAnalogVisuals(pin) {
 
-        chart.select("text")
-            .text(function(d) {
-                return d.value;
-            });
+    var chart = d3.select('#achart' + anadata[pin].pin).select("svg")
+        .data([anadata[pin]]);
 
-        chart.select(".line").datum(function(d) {
-                return analogLineData[d.pin];
-            })
-            .attr("d", line)
-            .attr("transform", null)
-            .transition()
-            .duration(500)
-            .ease("linear")
-            .attr("transform", "translate(" + x(-1) + ")");
+    // update
+    chart.select(".foreground")
+        .attr("d", function(d) {
+            var endangle = (d.value == 1023) ? twoPi : (twoPi / 1024) * d.value;
+            return arc.endAngle(endangle)();
+        });
 
-    }
+    chart.select("text")
+        .text(function(d) {
+            return d.value;
+        });
+
+    chart.select(".line").datum(function(d) {
+            return analogLineData[d.pin];
+        })
+        .attr("d", line)
+        .attr("transform", null)
+        .transition()
+        .duration(500)
+        .ease("linear")
+        .attr("transform", "translate(" + x(-1) + ")");
+
 }
