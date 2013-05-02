@@ -72,4 +72,12 @@ function DashboardCtrl($scope) {
 			socket.emit('servo-write', { pin: name, value: pin.value });
 	};
 
+	$scope.setSamplingInterval = function() {
+		socket.emit('sampling-interval', $scope.interval);
+	};
+
+	$scope.resetBoard = function() {
+		socket.emit('reset-board', 0);
+	};
+
 }

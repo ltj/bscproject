@@ -16,7 +16,19 @@ html(ng-app)
                     h2 Arduino Dashboard*
             .row-fluid
                 .span12.statusbar.well.well-small
-                    #status-msg.pull-right
+                    .row-fluid
+                        .span2
+                            button.btn-warning.btn-small(ng-click='resetBoard()') Reset board
+                        .span6
+                            form.form-inline
+                                label Sampling interval
+                                =' '
+                                input.input-small(type='text', placeholder='100 ms', ng-model='interval')
+                                =' '
+                                button.btn.btn-small(ng-click='setSamplingInterval()') Send
+                        .span4
+                            #status-msg.pull-right
+                    
             .row-fluid
                 .span6.analog-pins
                     h4 Analog pins

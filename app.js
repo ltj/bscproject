@@ -79,6 +79,9 @@ var board = new firmata.Board(config.serial.device, function(err) {
   console.log('Firmware: ' + board.firmware.name + '-' +
               board.firmware.version.major + '.' + board.firmware.version.minor);
 
+  // set safe sampling interval
+  board.setSamplingInterval(100);
+
 });
 
 // websockets connection and events
@@ -98,29 +101,45 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('digital-write', function(data) {
       board.digitalWrite(data.pin, data.value);
-      socket.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+      // broadcast value changes (HI/LOW or PWM)
+      io.sockets.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
     socket.on('pin-mode', function(data) {
       board.pinMode(data.pin, data.mode);
-      socket.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+      // broadcast mode change
+      io.sockets.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
     socket.on('analog-write', function(data) {
       board.analogWrite(data.pin, data.value);
+      // broadcast value changes (HI/LOW or PWM)
+      socket.broadcast.volatile.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
     socket.on('servo-write', function(data) {
       board.servoWrite(data.pin, data.value);
+      // broadcast value changes (HI/LOW or PWM)
+      io.sockets.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+    });
+
+    socket.on('sampling-interval', function(data) {
+      board.setSamplingInterval(data);
+    });
+
+    socket.on('reset-board', function(data) {
+      board.reset();
     });
 
 });
 
 // firmata events
 board.on('analog-read', function (data) {
-  io.sockets.emit('analog-read', data);
+  // broadcast analog reads as volatile (no ack)
+  io.sockets.volatile.emit('analog-read', data);
 });
 
 board.on('digital-read', function (data) {
-  io.sockets.emit('digital-read', data);
+  // broadcast digital reads as volatile (no ack)
+  io.sockets.volatile.emit('digital-read', data);
 });
