@@ -131,8 +131,8 @@ function setupAnalogVisuals() {
             .attr("d", arc.endAngle(twoPi));
 
         dial.append("path")
-            .attr("class", "foreground")
-            .attr("d", 0);
+            .attr("class", "foreground");
+            //.attr("d", 0);
 
         dial.append("text")
             .attr("text-anchor", "middle")

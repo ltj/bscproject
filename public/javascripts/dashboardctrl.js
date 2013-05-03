@@ -80,4 +80,9 @@ function DashboardCtrl($scope) {
 		socket.emit('reset-board', 0);
 	};
 
+	$scope.getLevelClass = function(pin) {
+		var cl = pin.value === 0 ? 'btn-info' : 'btn-success';
+		return cl;
+	};
+
 }
