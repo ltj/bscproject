@@ -127,6 +127,10 @@ io.sockets.on('connection', function (socket) {
       board.setSamplingInterval(data);
     });
 
+    socket.on('report-analog-pin', function(data) {
+      board.reportAnalogPin(data.pin, Number(data.value));
+    });
+
     socket.on('reset-board', function(data) {
 
       board.reset();
@@ -135,7 +139,7 @@ io.sockets.on('connection', function (socket) {
           board.queryFirmware(function() {
             board.queryCapabilities(function() {
               board.queryAnalogMapping(function() {
-                console.info('back from reset!');
+                console.info('Reset complete');
               });
             });
           });

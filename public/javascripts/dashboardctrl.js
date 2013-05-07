@@ -85,4 +85,8 @@ function DashboardCtrl($scope) {
 		return cl;
 	};
 
+	$scope.reportAnalogPin = function(pin) {
+		socket.emit('report-analog-pin', {pin: pin.analogChannel, value: pin.report});
+	};
+
 }

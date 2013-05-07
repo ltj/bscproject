@@ -41,6 +41,14 @@ html(ng-app)
                             .accordion-body.collapse.in(id='A'+'{{$index}}'+'-inner')
                                 .accordion-inner
                                     .chart(id='achart'+'{{$index}}')
+                                    .acontrols
+                                        form.form-inline
+                                            label.checkbox
+                                                input(type='checkbox', 
+                                                      ng-model='pin.report',
+                                                      ng-checked='pin.report',
+                                                      ng-change='reportAnalogPin(pin)')
+                                                ='Enable'
                 .span6.digital-pins
                     h4 Digital pins
                     #digital-accordion.accordion

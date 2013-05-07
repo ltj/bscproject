@@ -21,7 +21,7 @@ var arc = d3.svg.arc()
     .outerRadius(40);
 
 var margin = {top: 5, right: 10, bottom: 5, left: 40},
-    gWidth = width - 110 - margin.left - margin.right,
+    gWidth = width - 100 - margin.left - margin.right,
     gHeight = height - margin.top - margin.bottom;
 
 var x = d3.scale.linear()
@@ -124,7 +124,7 @@ function setupAnalogVisuals() {
 
         var dial = enter.append("g")
             .attr("class", "analog-dial")
-            .attr("transform", "translate(" + 50 + "," + 45 + ")");
+            .attr("transform", "translate(" + 40 + "," + 45 + ")");
 
         dial.append("path")
             .attr("class", "background")
@@ -138,8 +138,9 @@ function setupAnalogVisuals() {
             .attr("text-anchor", "middle")
             .attr("dy", ".35em")
             .text(0);
+
         var graph = enter.append("g")
-            .attr("transform", "translate(" + (margin.left + 110) + "," + margin.top + ")");
+            .attr("transform", "translate(" + (margin.left + 100) + "," + margin.top + ")");
 
         graph.append("defs").append("clipPath")
             .attr("id", "clip")
