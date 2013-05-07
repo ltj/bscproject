@@ -129,7 +129,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('report-analog-pin', function(data) {
       board.reportAnalogPin(data.pin, Number(data.value));
-      socket.broadcast.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+      //socket.broadcast.emit('pin-update', { pin: board.analogPins[data.pin], obj: board.pins[board.analogPins[data.pin]] });
     });
 
     socket.on('reset-board', function(data) {

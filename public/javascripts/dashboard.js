@@ -84,6 +84,7 @@ socket.on('board-pins', function(data) {
 socket.on('pin-update', function(data) {
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins[data.pin] = data.obj; });
+    // if(data.obj.analogChannel < 127) setupAnalogVisuals();
 });
 
 socket.on('analog-read', function (data) {
