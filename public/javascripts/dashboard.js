@@ -76,7 +76,10 @@ socket.on('board-pins', function(data) {
                 analogLineData[data[i].analogChannel] = [0];
             }
         }
-        setupAnalogVisuals();
+        // setup analog visuals for all analog pins
+        for(var j = 0; j < anadata.length; j++) {
+            setupAnalogVisuals(j);
+        }
         init = true;
     }
 });
@@ -84,7 +87,7 @@ socket.on('board-pins', function(data) {
 socket.on('pin-update', function(data) {
     var scope  = angular.element($('.container-fluid')).scope();
     scope.$apply( function() { scope.pins[data.pin] = data.obj; });
-    // if(data.obj.analogChannel < 127) setupAnalogVisuals();
+    if(data.obj.analogChannel < 127) setupAnalogVisuals(data.obj.analogChannel);
 });
 
 socket.on('analog-read', function (data) {
@@ -112,54 +115,52 @@ socket.emit('get-status', {});
 /*
  * D3 visualizations
  */
-function setupAnalogVisuals() {
-    for(var i = 0; i < anadata.length; i++) {
-        var pindata = anadata[i];
-        var container = d3.select('#achart' + anadata[i].pin);
-        var chart = container.selectAll("svg").data([pindata]);
+function setupAnalogVisuals(pin) {
+    var pindata = anadata[pin];
+    var container = d3.select('#achart' + anadata[pin].pin);
+    var chart = container.selectAll("svg").data([pindata]);
 
-        // enter
-        var enter = chart.enter().append("svg")
-            .attr("width", width)
-            .attr("height", height);
+    // enter
+    var enter = chart.enter().append("svg")
+        .attr("width", width)
+        .attr("height", height);
 
-        var dial = enter.append("g")
-            .attr("class", "analog-dial")
-            .attr("transform", "translate(" + 40 + "," + 45 + ")");
+    var dial = enter.append("g")
+        .attr("class", "analog-dial")
+        .attr("transform", "translate(" + 40 + "," + 45 + ")");
 
-        dial.append("path")
-            .attr("class", "background")
-            .attr("d", arc.endAngle(twoPi));
+    dial.append("path")
+        .attr("class", "background")
+        .attr("d", arc.endAngle(twoPi));
 
-        dial.append("path")
-            .attr("class", "foreground");
-            //.attr("d", 0);
+    dial.append("path")
+        .attr("class", "foreground");
+        //.attr("d", 0);
 
-        dial.append("text")
-            .attr("text-anchor", "middle")
-            .attr("dy", ".35em")
-            .text(0);
+    dial.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".35em")
+        .text(0);
 
-        var graph = enter.append("g")
-            .attr("transform", "translate(" + (margin.left + 100) + "," + margin.top + ")");
+    var graph = enter.append("g")
+        .attr("transform", "translate(" + (margin.left + 100) + "," + margin.top + ")");
 
-        graph.append("defs").append("clipPath")
-            .attr("id", "clip")
-            .append("rect")
-            .attr("width", gWidth)
-            .attr("height", gHeight);
+    graph.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", gWidth)
+        .attr("height", gHeight);
 
-        graph.append("g")
-            .attr("class", "y axis")
-            .call(d3.svg.axis().scale(y).orient("left"));
+    graph.append("g")
+        .attr("class", "y axis")
+        .call(d3.svg.axis().scale(y).orient("left"));
 
-        var path = graph.append("g")
-            .attr("clip-path", "url(#clip)")
-            .append("path")
-            .datum(0)
-            .attr("class", "line")
-            .attr("d", line);
-        }
+    var path = graph.append("g")
+        .attr("clip-path", "url(#clip)")
+        .append("path")
+        .datum(0)
+        .attr("class", "line")
+        .attr("d", line);
 }
 
 function updateAnalogVisuals(pin) {

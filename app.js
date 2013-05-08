@@ -108,7 +108,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('pin-mode', function(data) {
       board.pinMode(data.pin, data.mode);
       // broadcast mode change
-      io.sockets.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+      socket.broadcast.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
     socket.on('analog-write', function(data) {
@@ -120,7 +120,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('servo-write', function(data) {
       board.servoWrite(data.pin, data.value);
       // broadcast value changes (HI/LOW or PWM)
-      io.sockets.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
+      socket.broadcast.volatile.emit('pin-update', { pin: data.pin, obj: board.pins[data.pin] });
     });
 
     socket.on('sampling-interval', function(data) {
@@ -129,7 +129,8 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('report-analog-pin', function(data) {
       board.reportAnalogPin(data.pin, Number(data.value));
-      //socket.broadcast.emit('pin-update', { pin: board.analogPins[data.pin], obj: board.pins[board.analogPins[data.pin]] });
+      // broadcast report changes
+      socket.broadcast.emit('pin-update', { pin: board.analogPins[data.pin], obj: board.pins[board.analogPins[data.pin]] });
     });
 
     socket.on('reset-board', function(data) {
