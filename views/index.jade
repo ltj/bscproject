@@ -1,6 +1,16 @@
 extends layout
 
 block content
-  .container
-    h1= title
-    p Welcome to #{title}
+  .container-fluid
+    .row-fluid
+        .span12
+            h1= title
+            p Welcome to #{title}
+    .row-fluid
+        .span12
+            p
+                a(href='/dash') Arduino dashboard
+            p
+                a(href='/test') Test application
+
+

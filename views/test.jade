@@ -1,0 +1,33 @@
+extends layout
+
+block content
+    .container-fluid
+        .row-fluid
+            .span12
+                h1= title
+        .row-fluid
+            .span12
+                .btn#bigbutton Click when red!
+    script(src='/socket.io/socket.io.js')
+    script(src='/javascripts/arduinoAPI.js')
+    script
+        var button = document.getElementById("bigbutton");
+        var readSensorInput = function(data) {
+            if(data.pin === 0) {
+                if (data.value <= 510) {
+                    button.className = "btn btn-success";
+                    if(pins[3].value === 1) lightOff();
+                }
+                else {
+                    button.className = "btn btn-danger";
+                }
+            }
+        };
+        var lightOn = function() {
+            digitalWrite(3, 1);
+        }
+        var lightOff = function() {
+            digitalWrite(3, 0);
+        }
+        button.onclick = lightOn;
+        analogReadAll(readSensorInput);
